@@ -38,7 +38,7 @@ export function Budget({ sx, userRewards, totalReferralRewards }: BudgetProps): 
               }}
             >
               <img
-                src="/assets/tokenlogo.png" // Adjust this to your actual image path
+                src="/assets/test.png" // Adjust this to your actual image path
                 alt="Dollar Icon"
                 style={{ width: '80%', height: '80%' }}
               />
