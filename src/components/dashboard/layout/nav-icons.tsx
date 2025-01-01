@@ -1,11 +1,11 @@
-import type { Icon } from '@phosphor-icons/react/dist/lib/types';
-import { ChartPie as ChartPieIcon } from '@phosphor-icons/react/dist/ssr/ChartPie';
-import { Swap as SwapIcon } from '@phosphor-icons/react/dist/ssr/swap';
-import { GearSix as GearSixIcon } from '@phosphor-icons/react/dist/ssr/GearSix';
-import { PlugsConnected as PlugsConnectedIcon } from '@phosphor-icons/react/dist/ssr/PlugsConnected';
-import { User as UserIcon } from '@phosphor-icons/react/dist/ssr/User';
-import { Users as UsersIcon } from '@phosphor-icons/react/dist/ssr/Users';
-import { XSquare } from '@phosphor-icons/react/dist/ssr/XSquare';
+import type { Icon } from '@phosphor-icons/react';  // Direct import from the main package
+import { ChartPie as ChartPieIcon } from '@phosphor-icons/react';
+import { Swap as SwapIcon } from '@phosphor-icons/react';  // Simplified import
+import { GearSix as GearSixIcon } from '@phosphor-icons/react';
+import { PlugsConnected as PlugsConnectedIcon } from '@phosphor-icons/react';
+import { User as UserIcon } from '@phosphor-icons/react';
+import { Users as UsersIcon } from '@phosphor-icons/react';
+import { XSquare } from '@phosphor-icons/react';
 
 export const navIcons = {
   'chart-pie': ChartPieIcon,
@@ -13,7 +13,6 @@ export const navIcons = {
   'plugs-connected': PlugsConnectedIcon,
   'x-square': XSquare,
   'swap': SwapIcon,
-  
-  user: UserIcon,
-  users: UsersIcon,
+  'user': UserIcon,
+  'users': UsersIcon,
 } as Record<string, Icon>;
