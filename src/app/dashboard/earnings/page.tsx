@@ -1,27 +1,67 @@
 'use client';
 
 import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { Grid, Typography, Card, CardContent, Button, Box, TextField, Divider } from '@mui/material';
 import { MonetizationOn as MoneyIcon, AttachMoney as ConvertIcon, Savings as SavingsIcon } from '@mui/icons-material';
+import axios from 'axios';
 
 export default function RwaConversionPage(): React.JSX.Element {
-  const [rwaPoints, setRwaPoints] = React.useState(1500); // Tus puntos actuales
-  const [conversionRate, setConversionRate] = React.useState(0.5); // Tasa de conversión (ejemplo: 1 RWA Point = 0.5 $RWA)
-  const [pointsToConvert, setPointsToConvert] = React.useState(0);
-  const [convertedAmount, setConvertedAmount] = React.useState(0);
+  const [rwaPoints, setRwaPoints] = useState<number>(0); // Initialize RWA points state
+  const [conversionRate, setConversionRate] = useState<number>(0.5); // Conversion rate
+  const [pointsToConvert, setPointsToConvert] = useState<number>(0); // Points to convert
+  const [spentAmount, setSpentAmount] = useState<number>(0); // Amount already spent
+  const [remainingRwa, setRemainingRwa] = useState<number>(0); // Remaining RWA
+  const [convertedAmount, setConvertedAmount] = useState<number>(0); // Converted amount
+  const [userRewards, setUserRewards] = useState<number>(0); // State to store user rewards
+  const [loading, setLoading] = useState<boolean>(true); // Loading state for data fetching
 
+  // Fetch user rewards and calculate remaining RWA
+  useEffect(() => {
+    const fetchReferrals = async () => {
+      try {
+        const userId = sessionStorage.getItem('auth-session');
+        if (!userId) {
+          console.error('User not authenticated');
+          return;
+        }
+
+        const response = await axios.get(`/api/referrals?userId=${userId}`);
+        const { userRewards } = response.data; // Assuming userRewards is a number (total RWA points)
+
+        setUserRewards(userRewards); // Set the fetched user rewards
+        setRwaPoints(userRewards); // Initialize rwaPoints with the user rewards
+
+        // Calculate the remaining RWA after spending
+        setRemainingRwa(userRewards - spentAmount);
+      } catch (error) {
+        console.error('Error fetching referral data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReferrals();
+  }, [spentAmount]); // Dependency on spentAmount for recalculating remaining RWA
+
+  // Handle the RWA points conversion
   const handleConversion = () => {
     if (pointsToConvert > 0 && pointsToConvert <= rwaPoints) {
       setConvertedAmount(pointsToConvert * conversionRate);
-      setRwaPoints((prev) => prev - pointsToConvert); // Resta los puntos convertidos
+      setRwaPoints((prev) => prev - pointsToConvert); // Subtract converted points from available points
     } else {
       alert('Please enter a valid amount of points to convert.');
     }
   };
 
+  // Loading state
+  if (loading) {
+    return <Typography>Loading...</Typography>;
+  }
+
   return (
     <Grid container spacing={3} justifyContent="center" sx={{ padding: 3 }}>
-      {/* Título */}
+      {/* Title */}
       <Grid item xs={12}>
         <Typography variant="h4" textAlign="center" fontWeight="bold">
           RWA Points Conversion
@@ -31,7 +71,7 @@ export default function RwaConversionPage(): React.JSX.Element {
         </Typography>
       </Grid>
 
-      {/* Tarjeta de Puntos Actuales */}
+      {/* Current RWA Points Card */}
       <Grid item xs={12} sm={6}>
         <Card>
           <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -47,7 +87,7 @@ export default function RwaConversionPage(): React.JSX.Element {
         </Card>
       </Grid>
 
-      {/* Tarjeta de Tasa de Conversión */}
+      {/* Conversion Rate Card */}
       <Grid item xs={12} sm={6}>
         <Card>
           <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -65,7 +105,7 @@ export default function RwaConversionPage(): React.JSX.Element {
         </Card>
       </Grid>
 
-      {/* Sección de Conversión */}
+      {/* Conversion Section */}
       <Grid item xs={12}>
         <Card>
           <CardContent>
