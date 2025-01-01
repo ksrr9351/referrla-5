@@ -1,5 +1,3 @@
-// page.tsx
-
 'use client'; // Ensure this component is treated as a client-side component
 
 import * as React from 'react';
@@ -21,7 +19,11 @@ export default function Page(): React.JSX.Element {
   const [spentAmount, setSpentAmount] = useState<number>(0);
   const [remainingRwa, setRemainingRwa] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
-  const [referrals, setReferrals] = useState<Referral[]>([]);  // State for storing referrals data
+  const [referrals, setReferrals] = useState<Referral[]>([]); // State for storing referrals data
+  const [chartData, setChartData] = useState<{ thisYear: number[]; lastYear: number[] }>({
+    thisYear: Array(12).fill(0), // Initialize with 12 months of 0
+    lastYear: Array(12).fill(0),
+  });
 
   useEffect(() => {
     const fetchReferrals = async () => {
@@ -36,16 +38,39 @@ export default function Page(): React.JSX.Element {
         const { userRewards, referrals } = response.data;
 
         setUserRewards(userRewards);
-        setReferrals(referrals);  // Set referrals data from the response
+        setReferrals(referrals); // Set referrals data from the response
 
-        // Filter referrals created today and calculate the total referral rewards
+        // Generate chart data
+        const thisYear = dayjs().year();
+        const lastYear = thisYear - 1;
+
+        const chartThisYear = Array(12).fill(0);
+        const chartLastYear = Array(12).fill(0);
+
+        referrals.forEach((referral: any) => {
+          const referralDate = dayjs(referral.date);
+          const monthIndex = referralDate.month(); // 0 for January, 11 for December
+
+          if (referralDate.year() === thisYear) {
+            chartThisYear[monthIndex] += referral.rewards;
+          } else if (referralDate.year() === lastYear) {
+            chartLastYear[monthIndex] += referral.rewards;
+          }
+        });
+
+        setChartData({ thisYear: chartThisYear, lastYear: chartLastYear });
+
+        // Calculate today's referral rewards
         const today = dayjs().startOf('day');
         const todayReferrals = referrals.filter((referral: any) =>
           dayjs(referral.date).isSame(today, 'day')
         );
-        const totalTodayReferralRewards = todayReferrals.reduce((sum: number, referral: any) => sum + referral.rewards, 0);
+        const totalTodayReferralRewards = todayReferrals.reduce(
+          (sum: number, referral: any) => sum + referral.rewards,
+          0
+        );
 
-        setTotalReferralRewards(totalTodayReferralRewards);  // Set the total referral rewards
+        setTotalReferralRewards(totalTodayReferralRewards); // Set the total referral rewards
       } catch (error) {
         console.error('Error fetching referral data:', error);
       } finally {
@@ -58,7 +83,7 @@ export default function Page(): React.JSX.Element {
 
   useEffect(() => {
     if (userRewards !== null) {
-      setRemainingRwa(userRewards - spentAmount);  // Calculate remaining $RWA
+      setRemainingRwa(userRewards - spentAmount); // Calculate remaining $RWA
     }
   }, [userRewards, spentAmount]);
 
@@ -83,8 +108,8 @@ export default function Page(): React.JSX.Element {
       <Grid lg={12} xs={12}>
         <Sales
           chartSeries={[
-            { name: 'This year', data: [0, 0, 0, 0, 0, 0, 50, 1, 10, 5, 10, 20] },
-            { name: 'Last year', data: [12, 33, 0, 0, 12, 14, 0, 0, 0, 5, 0, 0] },
+            { name: 'This year', data: chartData.thisYear },
+            { name: 'Last year', data: chartData.lastYear },
           ]}
           sx={{ height: '100%' }}
         />
